@@ -1,0 +1,1 @@
+declare module '*.png'; // Ambient declaration to convince tsc that we can load .png
