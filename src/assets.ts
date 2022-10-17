@@ -11,5 +11,5 @@ export const spriteAssets = {
   chicken: { name: 'chicken', url: chickenSprite },
   cow: { name: 'cow', url: cowSprite },
   egg: { name: 'egg', url: eggSprite },
-  milk: { name: 'bilk', url: milkSprite },
+  milk: { name: 'milk', url: milkSprite },
 } as const

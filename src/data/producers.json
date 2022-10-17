@@ -1,0 +1,33 @@
+[
+  {
+    "name": "wheat",
+    "yields": {
+      "product": "wheat",
+      "period": 100
+    }
+  },
+  {
+    "name": "chicken",
+    "consumes": {
+        "product": "wheat",
+        "period": 300
+      }
+    ,
+    "yields": {
+      "product": "egg",
+      "period": 100
+    }
+  },
+  {
+    "name": "cow",
+    "consumes": {
+        "product": "wheat",
+        "period": 200
+      }
+    ,
+    "yields": {
+      "product": "milk",
+      "period": 200
+    }
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "wheat"
+  },
+  {
+    "name": "egg",
+    "sellPrice": 100
+  },
+  {
+    "name": "milk",
+    "sellPrice": 150
+  }
+]
