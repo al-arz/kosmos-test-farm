@@ -1,75 +1,53 @@
-import { Application, Loader, settings, SCALE_MODES, IApplicationOptions, Container, utils } from "pixi.js";
+import { Application, Loader, IApplicationOptions, Container } from "pixi.js";
+import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
-import { BasicProducer, ConsumingProducer, ProductType } from "./game/Entities";
-import { FarmStorage } from "./game/FarmStorage";
-import { ProducerSprite } from "./views/ProducerSprite";
-import { FarmStorageView } from "./views/FarmStorageView";
 import { FarmPlotView } from "./views/FarmPlotView";
+import { FarmStorage } from "./game/FarmStorage";
+import { FarmStorageView } from "./views/FarmStorageView";
 import { SpawnButton } from "./ui/SpawnButton";
 import producers from "./data/producers.json";
 import products from "./data/products.json";
 
 export class Game {
   app: Application
-  events: utils.EventEmitter
 
-  farmPlot: FarmPlot
-  farmPlotView: FarmPlotView
-
-  farmStorage: FarmStorage
-  farmStorageView: FarmStorageView
+  farmPlot!: FarmPlot
+  farmStorage!: FarmStorage
 
   constructor(options: IApplicationOptions) {
-    settings.SCALE_MODE = SCALE_MODES.NEAREST // pixel art sprites should stay crisp
-
     this.app = new Application(options)
-    this.events = new utils.EventEmitter()
 
     Loader.shared.add(Object.values(spriteAssets))
     Loader.shared.onComplete.once(this.onAssetsLoad, this)
     Loader.shared.load()
-    console.log("loading assets")
   }
 
   onAssetsLoad() {
     console.log("assets loaded")
+    this.setup()
+  }
 
+  setup() {
     this.farmPlot = new FarmPlot({ shape: "square", size: 8 })
-    this.farmPlotView = this.createFarmPlotView(this.farmPlot)
-    this.app.stage.addChild(this.farmPlotView)
-
-    this.createSpawnButtons()
+    this.placePlotView(this.farmPlot.view)
 
     this.farmStorage = new FarmStorage()
-    this.farmStorageView = this.createStorageView(this.farmStorage)
-    this.app.stage.addChild(this.farmStorageView)
+    this.placeStorageView(this.farmStorage.view)
+
+    this.addSpawnButtons()
 
     this.app.ticker.add((dt) => {
-      this.farmPlot.entities.forEach(e => {
-        e.update(dt)
-      })
-
-      this.farmPlotView.entitySprites.forEach(s => {
-        s.update()
-      })
+      this.farmPlot.update(dt)
     })
 
-    this.events.on("harvested", this.storeProduct, this)
-    this.events.on("spawn-entity", this.spawnEntity, this)
+    events.on("spawn-entity", this.farmPlot.spawnEntity, this.farmPlot)
+    events.on("harvested", this.farmStorage.storeProduct, this.farmStorage)
+
+    console.log("game objects set up")
   }
 
-  createFarmPlotView(plot: FarmPlot) {
-    const plotContainer = new FarmPlotView(plot, this.events)
-
-    plotContainer.position.set(
-      (this.app.screen.width - plotContainer.width) / 2,
-      (this.app.screen.height - plotContainer.height) / 2)
-
-    return plotContainer
-  }
-
-  createSpawnButtons() {
+  addSpawnButtons() {
     const buttonsContainer = new Container()
 
     producers.forEach(p => {
@@ -77,7 +55,7 @@ export class Game {
       btn.y = buttonsContainer.height
       buttonsContainer.addChild(btn)
       btn.on("pointertap", () => {
-        this.events.emit("spawn-entity", p)
+        events.emit("spawn-entity", p)
       })
     })
 
@@ -89,40 +67,21 @@ export class Game {
     this.app.stage.addChild(buttonsContainer)
   }
 
-  createStorageView(storage: FarmStorage) {
-    const storageView = new FarmStorageView(storage)
-
+  placeStorageView(storageView: FarmStorageView) {
     storageView.position.set(
       this.app.screen.width - storageView.width,
       (this.app.screen.height - storageView.height) / 2
     )
 
-    return storageView
+    this.app.stage.addChild(storageView)
   }
 
-  spawnEntity(p) {
-    const tile = this.farmPlotView.children.find(tileSprite => tileSprite.data.isEmpty)
-    if (!tile) return
+  placePlotView(plotView: FarmPlotView) {
+    plotView.position.set(
+      (this.app.screen.width - plotView.width) / 2,
+      (this.app.screen.height - plotView.height) / 2
+    )
 
-    let entity, sprite
-    if (p.consumes) {
-      entity = new ConsumingProducer(p)
-      sprite = new ProducerSprite<ConsumingProducer>(entity, p.name)
-    } else {
-      entity = new BasicProducer(p)
-      sprite = new ProducerSprite<BasicProducer>(entity, p.name)
-    }
-
-    this.farmPlot.entities.push(entity)
-    tile.data.add(entity)
-
-    this.farmPlotView.entitySprites.push(sprite)
-    tile.addChild(sprite)
-  }
-
-  storeProduct(p: ProductType) {
-    this.farmStorage.products[p]++
-    console.log("farm storage", this.farmStorage)
-    this.farmStorageView.update()
+    this.app.stage.addChild(plotView)
   }
 }

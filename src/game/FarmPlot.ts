@@ -1,4 +1,6 @@
-import { IConsumer, IProducer } from "./Entities"
+import { FarmPlotView } from "../views/FarmPlotView"
+import { ProducerSprite } from "../views/ProducerSprite"
+import { BasicProducer, ConsumingProducer, IConsumer, IProducer } from "./Entities"
 import { Tile } from "./Tile"
 
 export type FarmPlotConfig = {
@@ -10,19 +12,7 @@ export class FarmPlot {
   configuration: FarmPlotConfig
   tiles: Tile[]
   entities: Array<IProducer | IConsumer> = []
-
-  constructor(configuration: FarmPlotConfig) {
-    this.configuration = configuration
-
-    switch (configuration.shape) {
-      case "square":
-        this.tiles = FarmPlot.buildSquarePlot(configuration.size)
-        break;
-      default:
-        this.tiles = []
-        break;
-    }
-  }
+  view: FarmPlotView
 
   static buildSquarePlot(size: number = 8) {
     const tiles = []
@@ -37,5 +27,50 @@ export class FarmPlot {
       }
     }
     return tiles
+  }
+
+  constructor(configuration: FarmPlotConfig) {
+    this.configuration = configuration
+
+    switch (configuration.shape) {
+      case "square":
+        this.tiles = FarmPlot.buildSquarePlot(configuration.size)
+        break;
+      default:
+        this.tiles = []
+        break;
+    }
+
+    this.view = new FarmPlotView(this)
+  }
+
+  update(dt: number) {
+    this.entities.forEach(e => {
+      e.update(dt)
+    })
+
+    this.view.entitySprites.forEach(s => {
+      s.update()
+    })
+  }
+
+  spawnEntity(p) {
+    const tile = this.view.children.find(tileSprite => tileSprite.data.isEmpty)
+    if (!tile) return
+
+    let entity, sprite
+    if (p.consumes) {
+      entity = new ConsumingProducer(p)
+      sprite = new ProducerSprite<ConsumingProducer>(entity, p.name)
+    } else {
+      entity = new BasicProducer(p)
+      sprite = new ProducerSprite<BasicProducer>(entity, p.name)
+    }
+
+    this.entities.push(entity)
+    tile.data.add(entity)
+
+    this.view.entitySprites.push(sprite)
+    tile.addChild(sprite)
   }
 }

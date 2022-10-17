@@ -9,7 +9,7 @@ export class FarmStorageView extends Container<StorageEntryView>{
     super()
     this.storage = storage
 
-    const storedProducts = Object.keys(storage) as ProductType[]
+    const storedProducts = Object.keys(storage.products) as ProductType[]
     storedProducts.forEach(p => {
       console.log("adding storage for", p)
       const entry: StorageEntryView = new StorageEntryView(p)
@@ -20,7 +20,7 @@ export class FarmStorageView extends Container<StorageEntryView>{
 
   update() {
     this.children.forEach(entry => {
-      entry.label.text = this.storage[entry.productType]
+      entry.label.text = this.storage.products[entry.productType]
     })
   }
 }
