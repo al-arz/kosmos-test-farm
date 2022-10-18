@@ -21,7 +21,7 @@ export class Tile {
     return this.contents.length === 0
   }
 
-  add(entity: IProducer | IConsumer) {
+  addEntity(entity: IProducer | IConsumer) {
     this.contents.push(entity)
   }
 }

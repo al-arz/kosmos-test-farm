@@ -1,5 +1,6 @@
 import { FarmPlotView } from "../views/FarmPlotView"
 import { ProducerSprite } from "../views/ProducerSprite"
+import { TileSprite } from "../views/TileSprite"
 import { BasicProducer, ConsumingProducer, IConsumer, IProducer } from "./Entities"
 import { Tile } from "./Tile"
 
@@ -61,16 +62,34 @@ export class FarmPlot {
     let entity, sprite
     if (p.consumes) {
       entity = new ConsumingProducer(p)
-      sprite = new ProducerSprite<ConsumingProducer>(entity, p.name)
     } else {
       entity = new BasicProducer(p)
-      sprite = new ProducerSprite<BasicProducer>(entity, p.name)
     }
 
+    sprite = new ProducerSprite(entity, p.name)
     this.entities.push(entity)
-    tile.data.add(entity)
+    tile.data.addEntity(entity)
 
     this.view.entitySprites.push(sprite)
     tile.addChild(sprite)
+  }
+
+  placeOnTile(entity: IProducer, sprite: ProducerSprite, tileSprite: TileSprite) {
+    this.entities.push(entity)
+    tileSprite.data.addEntity(entity)
+    tileSprite.buttonMode = true
+    this.view.entitySprites.push(sprite)
+    sprite.position.set(0, 0)
+    sprite.scale.set(0.5)
+    sprite.alpha = 1
+    tileSprite.addChild(sprite)
+  }
+
+  getNewEntity(p) {
+    if (p.consumes) {
+      return new ConsumingProducer(p)
+    } else {
+      return new BasicProducer(p)
+    }
   }
 }

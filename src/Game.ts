@@ -1,4 +1,4 @@
-import { Application, Loader, IApplicationOptions, Container } from "pixi.js";
+import { Application, Loader, IApplicationOptions, Container, InteractionEvent, InteractionData, DisplayObject } from "pixi.js";
 import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
@@ -8,6 +8,9 @@ import { FarmStorageView } from "./views/FarmStorageView";
 import { SpawnButton } from "./ui/SpawnButton";
 import producers from "./data/producers.json";
 import products from "./data/products.json";
+import { ProducerSprite } from "./views/ProducerSprite";
+import { IProducer, ProducerType, ProductType } from "./game/Entities";
+import { DragGhost } from "./ui/DragGhost";
 
 export class Game {
   app: Application
@@ -43,6 +46,17 @@ export class Game {
 
     events.on("spawn-entity", this.farmPlot.spawnEntity, this.farmPlot)
     events.on("harvested", this.farmStorage.storeProduct, this.farmStorage)
+    events.on("harvest-attempt", ({ event, entity, tileSprite }) => {
+      const ghost = new DragGhost(entity.output)
+      ghost.setDragOffset(event.data, tileSprite)
+      this.app.stage.addChild(ghost)
+      ghost.onDragStart(event)
+      ghost.on("pointermove", ghost.onDragMove)
+      ghost.on("pointerup", () => {
+        ghost.onDragEnd()
+        events.emit("harvested", entity.harvest())
+      })
+    })
 
     console.log("game objects set up")
   }
@@ -51,11 +65,36 @@ export class Game {
     const buttonsContainer = new Container()
 
     producers.forEach(p => {
-      const btn = new SpawnButton(p.name)
+      const producerType = p.type as ProducerType
+      const btn = new SpawnButton(producerType)
       btn.y = buttonsContainer.height
       buttonsContainer.addChild(btn)
-      btn.on("pointertap", () => {
-        events.emit("spawn-entity", p)
+
+      btn.on("pointerdown", (e: InteractionEvent) => {
+        const ghost = new DragGhost(p.type as ProductType)
+        this.app.stage.addChild(ghost)
+        ghost.setDragOffset(e.data, btn)
+        ghost.onDragStart(e)
+
+        const onDragEnd = () => {
+          ghost.onDragEnd()
+          this.farmPlot.view.cancelSelection()
+        }
+        ghost
+          .on('pointermove', (e) => {
+            this.farmPlot.view.findOverlap(e)
+            ghost.onDragMove(e)
+          })
+          .on('pointerup', () => {
+            const targetTile = this.farmPlot.view.findOverlap(e)
+            if (targetTile) {
+              const entity = this.farmPlot.getNewEntity(p)
+              const sprite = new ProducerSprite(entity, producerType)
+              this.farmPlot.placeOnTile(entity, sprite, targetTile)
+            }
+            onDragEnd()
+          })
+          .on('pointerupoutside', onDragEnd)
       })
     })
 

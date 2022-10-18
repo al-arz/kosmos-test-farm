@@ -3,6 +3,12 @@ import { ProgressTimer } from "./ProgressTimer"
 export type ProducerType = "wheat" | "chicken" | "cow"
 export type ProductType = "wheat" | "egg" | "milk"
 
+export type SomeProducer = BasicProducer | ConsumingProducer
+
+export function isConsumingProducer(entity: SomeProducer): entity is ConsumingProducer {
+  return (entity as ConsumingProducer).input !== undefined;
+}
+
 export type BasicProducerConfig = {
   name: ProducerType
   yields: {

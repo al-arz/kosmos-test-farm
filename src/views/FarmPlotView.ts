@@ -1,13 +1,12 @@
-import { Container } from "pixi.js";
-import { events } from "../events";
-import { BasicProducer, ConsumingProducer, IConsumer, IProducer } from "../game/Entities";
+import { Container, InteractionEvent } from "pixi.js";
 import { FarmPlot } from "../game/FarmPlot";
-import { Tile } from "../game/Tile";
 import { ProducerSprite } from "./ProducerSprite";
 import { TileSprite } from "./TileSprite";
 
 export class FarmPlotView extends Container<TileSprite> {
-  entitySprites: Array<ProducerSprite<BasicProducer | ConsumingProducer>> = []
+  entitySprites: Array<ProducerSprite> = []
+  tileSprites: Array<TileSprite> = []
+  selectedTile: TileSprite | null = null
 
   constructor(plot: FarmPlot) {
     super()
@@ -16,30 +15,42 @@ export class FarmPlotView extends Container<TileSprite> {
 
     plot.tiles.forEach(t => {
       const tileSprite = new TileSprite(t)
-
-      tileSprite.on('pointertap', this.tapOnTile.bind(this, t))
-
+      this.tileSprites.push(tileSprite)
       this.addChild(tileSprite)
     })
   }
 
-  tapOnTile(t: Tile) {
-    console.log("tap on tile", t.id, t.position)
-    t.contents.forEach(e => {
-      if (e.harvestReady) {
-        const producer = (e as IProducer)
-        const harvest = producer.harvest()
-        console.log("harvested", harvest)
-        events.emit("harvested", harvest)
-      }
-      if (e.consumptionTimer != undefined) {
-        const consumer = (e as IConsumer)
-        // if (this.storage[consumer.input] > 0) {
-        // this.storage[consumer.input]--
-        // this.updateStorageInterface(this.storageView, this.storage)
-        consumer.supply(consumer.input)
-        // }
+  findOverlap(e: InteractionEvent) {
+    let nearest = this.tileSprites[0]
+    const pos0 = e.data.getLocalPosition(nearest)
+    let minDistSq = pos0.x * pos0.x + pos0.y * pos0.y
+
+    this.tileSprites.forEach(t => {
+      const pos = e.data.getLocalPosition(t)
+      const distSq = pos.x * pos.x + pos.y * pos.y
+      if (minDistSq > distSq) {
+        minDistSq = distSq
+        nearest = t
       }
     })
+
+    if (this.selectedTile) {
+      this.selectedTile.alpha = 1
+    }
+    if (minDistSq < 300) {
+      nearest.alpha = 0.5
+      this.selectedTile = nearest
+    } else {
+      this.selectedTile = null
+
+    }
+    return this.selectedTile
+  }
+
+  cancelSelection() {
+    if (this.selectedTile) {
+      this.selectedTile.alpha = 1
+    }
+    this.selectedTile = null
   }
 }

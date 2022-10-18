@@ -1,4 +1,4 @@
-import { Container } from "pixi.js";
+import { Container, InteractionEvent, Sprite } from "pixi.js";
 import { ProductType } from "../game/Entities";
 import { FarmStorage } from "../game/FarmStorage";
 import { StorageEntryView } from "./StorageEntryView";

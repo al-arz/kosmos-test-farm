@@ -1,17 +1,13 @@
 import { Sprite, Texture } from "pixi.js";
 import { ProgressBar } from "../ui/ProgressBar";
-import { BasicProducer, ConsumingProducer, ProducerType } from "../game/Entities";
+import { isConsumingProducer, ProducerType, SomeProducer } from "../game/Entities";
 
-function isConsumingProducer(entity: BasicProducer | ConsumingProducer): entity is ConsumingProducer {
-  return (entity as ConsumingProducer).input !== undefined;
-}
-
-export class ProducerSprite<T extends BasicProducer | ConsumingProducer> extends Sprite {
-  data: T
+export class ProducerSprite extends Sprite {
+  data: SomeProducer
   productionBar?: ProgressBar
   consumptionBar?: ProgressBar
 
-  constructor(data: T, type: ProducerType) {
+  constructor(data: SomeProducer, type: ProducerType) {
     super(Texture.from(type))
     this.data = data
 
