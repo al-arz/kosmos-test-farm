@@ -41,8 +41,8 @@ export class Game {
 
     this.addSpawnButtons()
 
-    this.app.ticker.add((dt) => {
-      this.farmPlot.update(dt)
+    this.app.ticker.add((_) => {
+      this.farmPlot.update(this.app.ticker.deltaMS)
     })
 
     events.on("spawn-entity", this.farmPlot.spawnEntity, this.farmPlot)

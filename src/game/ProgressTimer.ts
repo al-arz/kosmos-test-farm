@@ -6,8 +6,8 @@ export class ProgressTimer {
     this._timePassed = initialTime
   }
 
-  advance(dt: number) {
-    this._timePassed += dt
+  advance(deltaMS: number) {
+    this._timePassed += deltaMS
   }
 
   reset() {

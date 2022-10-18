@@ -3,31 +3,31 @@
     "type": "wheat",
     "yields": {
       "product": "wheat",
-      "period": 100
+      "period": 10000
     }
   },
   {
     "type": "chicken",
     "consumes": {
         "product": "wheat",
-        "period": 300
+        "period": 30000
       }
     ,
     "yields": {
       "product": "egg",
-      "period": 100
+      "period": 10000
     }
   },
   {
     "type": "cow",
     "consumes": {
         "product": "wheat",
-        "period": 200
+        "period": 20000
       }
     ,
     "yields": {
       "product": "milk",
-      "period": 200
+      "period": 20000
     }
   }
 ]

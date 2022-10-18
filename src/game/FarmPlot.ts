@@ -45,9 +45,9 @@ export class FarmPlot {
     this.view = new FarmPlotView(this)
   }
 
-  update(dt: number) {
+  update(deltaMS: number) {
     this.entities.forEach(e => {
-      e.update(dt)
+      e.update(deltaMS)
     })
 
     this.view.entitySprites.forEach(s => {

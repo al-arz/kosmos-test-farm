@@ -27,14 +27,14 @@ export type ConsumingProducerConfig = BasicProducerConfig & {
 export interface IProducer {
   productionTimer: ProgressTimer
   output: ProductType
-  update(dt: number): void
+  update(deltaMS: number): void
   harvest(): ProductType
 }
 
 export interface IConsumer {
   consumptionTimer: ProgressTimer
   input: ProductType
-  update(dt: number): void
+  update(ddeltaMS: number): void
   supply(input: ProductType): void
 }
 
@@ -48,13 +48,13 @@ export class BasicProducer implements IProducer {
     this.output = config.yields.product
   }
 
-  update(dt: number): void {
-    this.advanceProduction(dt)
+  update(deltaMS: number): void {
+    this.advanceProduction(deltaMS)
   }
 
-  advanceProduction(dt: number) {
+  advanceProduction(deltaMS: number) {
     if (!this.harvestReady) {
-      this.productionTimer.advance(dt)
+      this.productionTimer.advance(deltaMS)
       if (this.productionTimer.isComplete) {
         this.harvestReady = true
       }
@@ -84,23 +84,23 @@ export class ConsumingProducer implements IConsumer, IProducer {
     this.output = config.yields.product
   }
 
-  update(dt: number) {
+  update(deltaMS: number) {
     if (this.supplied) {
-      this.advanceConsumption(dt)
-      this.advanceProduction(dt)
+      this.advanceConsumption(deltaMS)
+      this.advanceProduction(deltaMS)
     }
   }
 
-  advanceConsumption(dt: number) {
-    this.consumptionTimer.advance(dt)
+  advanceConsumption(deltaMS: number) {
+    this.consumptionTimer.advance(deltaMS)
     if (this.consumptionTimer.isComplete) {
       this.supplied = false
     }
   }
 
-  advanceProduction(dt: number) {
+  advanceProduction(deltaMS: number) {
     if (!this.harvestReady) {
-      this.productionTimer.advance(dt)
+      this.productionTimer.advance(deltaMS)
       if (this.productionTimer.isComplete) {
         this.harvestReady = true
       }
