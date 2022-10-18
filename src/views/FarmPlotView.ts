@@ -20,12 +20,21 @@ export class FarmPlotView extends Container<TileSprite> {
     })
   }
 
-  findOverlap(e: InteractionEvent) {
-    let nearest = this.tileSprites[0]
+  findOverlap(e: InteractionEvent, filter?) {
+
+    let subset = this.tileSprites
+    if (filter) {
+      console.log('filtered')
+      subset = subset.filter(filter)
+      if (subset.length === 0) return null
+    }
+
+
+    let nearest = subset[0]
     const pos0 = e.data.getLocalPosition(nearest)
     let minDistSq = pos0.x * pos0.x + pos0.y * pos0.y
 
-    this.tileSprites.forEach(t => {
+    subset.forEach(t => {
       const pos = e.data.getLocalPosition(t)
       const distSq = pos.x * pos.x + pos.y * pos.y
       if (minDistSq > distSq) {

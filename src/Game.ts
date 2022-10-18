@@ -9,8 +9,9 @@ import { SpawnButton } from "./ui/SpawnButton";
 import producers from "./data/producers.json";
 import products from "./data/products.json";
 import { ProducerSprite } from "./views/ProducerSprite";
-import { IProducer, ProducerType, ProductType } from "./game/Entities";
+import { IProducer, isConsumingProducer, ProducerType, ProductType } from "./game/Entities";
 import { DragGhost } from "./ui/DragGhost";
+import { TileSprite } from "./views/TileSprite";
 
 export class Game {
   app: Application
@@ -51,10 +52,24 @@ export class Game {
       ghost.setDragOffset(event.data, tileSprite)
       this.app.stage.addChild(ghost)
       ghost.onDragStart(event)
-      ghost.on("pointermove", ghost.onDragMove)
-      ghost.on("pointerup", () => {
+      ghost.on("pointermove", (e) => {
+        this.farmPlot.view.findOverlap(e, (t: TileSprite) => {
+          return !t.data.isEmpty && (t.data.contents[0].input === entity.output)
+        })
+        ghost.onDragMove(e)
+      })
+      ghost.on("pointerup", (e) => {
+        const target = this.farmPlot.view.findOverlap(e, (t: TileSprite) => {
+          return !t.data.isEmpty && (t.data.contents[0].input === entity.output)
+        })
         ghost.onDragEnd()
-        events.emit("harvested", entity.harvest())
+        if (target) {
+          target.data.contents[0].supply(entity.output)
+          this.farmPlot.view.cancelSelection()
+          entity.harvest()
+        } else {
+          events.emit("harvested", entity.harvest())
+        }
       })
     })
 
@@ -82,11 +97,11 @@ export class Game {
         }
         ghost
           .on('pointermove', (e) => {
-            this.farmPlot.view.findOverlap(e)
+            this.farmPlot.view.findOverlap(e, t => t.data.isEmpty)
             ghost.onDragMove(e)
           })
           .on('pointerup', () => {
-            const targetTile = this.farmPlot.view.findOverlap(e)
+            const targetTile = this.farmPlot.view.findOverlap(e, t => t.data.isEmpty)
             if (targetTile) {
               const entity = this.farmPlot.getNewEntity(p)
               const sprite = new ProducerSprite(entity, producerType)
