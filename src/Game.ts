@@ -1,4 +1,4 @@
-import { Application, Loader, IApplicationOptions, Container, InteractionEvent } from "pixi.js";
+import { Application, Loader, IApplicationOptions, Container, InteractionEvent, DisplayObject } from "pixi.js";
 import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
@@ -77,9 +77,11 @@ export class Game {
   addSpawnButtons(configs: ProducerConfig[]) {
     const buttonsContainer = new Container()
 
+    let yOffset = 0
     configs.forEach(p => {
       const btn = new SpawnButton(p.type)
-      btn.y = buttonsContainer.height
+      btn.y = yOffset
+      yOffset += 32 * 3
       buttonsContainer.addChild(btn)
 
       // needs decoupling from farmPlot
@@ -110,10 +112,11 @@ export class Game {
     })
 
     buttonsContainer.position.set(
-      buttonsContainer.width,
+      0,
       (this.app.screen.height - buttonsContainer.height) / 2
     )
 
+    this.offsetBounds(buttonsContainer)
     this.app.stage.addChild(buttonsContainer)
   }
 
@@ -123,6 +126,7 @@ export class Game {
       (this.app.screen.height - storageView.height) / 2
     )
 
+    this.offsetBounds(storageView)
     this.app.stage.addChild(storageView)
   }
 
@@ -132,6 +136,15 @@ export class Game {
       (this.app.screen.height - plotView.height) / 2
     )
 
+    this.offsetBounds(plotView)
     this.app.stage.addChild(plotView)
+  }
+
+  // Setting container childrens' anchor offsets container bounds
+  // Here we're adjusting for that. Yes, it's ugly
+  offsetBounds(obj: DisplayObject) {
+    const bounds = obj.getBounds()
+    obj.x += obj.x - bounds.left
+    obj.y += obj.y - bounds.top
   }
 }

@@ -1,6 +1,5 @@
-import { Container, InteractionEvent } from "pixi.js";
-import { ProducerConfig } from "../Game";
-import { SomeProducer } from "../game/Entities";
+import { Container, Graphics, InteractionEvent } from "pixi.js";
+import { ProducerConfig, SomeProducer } from "../game/Entities";
 import { FarmPlot } from "../game/FarmPlot";
 import { ProducerSprite } from "./ProducerSprite";
 import { TileSprite } from "./TileSprite";
@@ -18,8 +17,18 @@ export class FarmPlotView extends Container<TileSprite> {
     plot.tiles.forEach(t => {
       const tileSprite = new TileSprite(t)
       this.tileSprites.push(tileSprite)
+      tileSprite.position.set(
+        t.position.col * 32 * 3,
+        t.position.row * 32 * 3
+      )
       this.addChild(tileSprite)
     })
+
+    const g = new Graphics()
+    g.drawRect(0, 0, this.width, this.height)
+    g.beginFill(0xee0000)
+    g.endFill()
+    this.addChild(g)
   }
 
   displayOnTile(entity: SomeProducer, config: ProducerConfig, tileSprite: TileSprite) {

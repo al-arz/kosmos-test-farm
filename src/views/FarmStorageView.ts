@@ -5,15 +5,19 @@ import { StorageEntryView } from "./StorageEntryView";
 
 export class FarmStorageView extends Container<StorageEntryView>{
   storage: FarmStorage
+  size = 4
+
   constructor(storage: FarmStorage) {
     super()
     this.storage = storage
 
     const storedProducts = Object.keys(storage.products) as ProductType[]
+    let yOffset = 0
     storedProducts.forEach(p => {
       console.log("adding storage for", p)
-      const entry: StorageEntryView = new StorageEntryView(p)
-      entry.y = this.height
+      const entry: StorageEntryView = new StorageEntryView(p, this.size)
+      entry.y = yOffset
+      yOffset += 32 * this.size
       this.addChild(entry)
     })
   }

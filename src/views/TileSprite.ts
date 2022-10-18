@@ -12,10 +12,10 @@ export class TileSprite extends Sprite {
     this.data = data
 
     this.anchor.set(0.5)
-    this.scale.set(6)
+    this.scale.set(3)
     this.position.set(
-      data.position.col * 16 * 6,
-      data.position.row * 16 * 6
+      data.position.col * 32 * 3,
+      data.position.row * 24 * 3
     )
     this.interactive = true
     this.on("pointerdown", this.onPointerDown, this)

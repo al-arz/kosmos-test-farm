@@ -11,17 +11,19 @@ export class ProducerSprite extends Sprite {
     super(Texture.from(type))
     this.data = data
 
-    this.scale.set(0.5)
-    this.anchor.set(0.5)
+    // this.scale.set(0.5)
+    this.anchor.set(0.5, 0.5)
 
     //Builder pattern?
-    this.productionBar = new ProgressBar()
-    this.productionBar.position.y = 6
+    this.productionBar = new ProgressBar(0xFFFFFF)
+    this.productionBar.position.y = 14
+    this.productionBar.scale.set(2)
     this.addChild(this.productionBar)
 
     if (isConsumingProducer(data)) {
-      this.consumptionBar = new ProgressBar()
-      this.consumptionBar.position.y = -7
+      this.consumptionBar = new ProgressBar(0xF9C22B)
+      this.consumptionBar.position.y = 12
+      this.consumptionBar.scale.set(2)
       this.addChild(this.consumptionBar)
     }
   }
