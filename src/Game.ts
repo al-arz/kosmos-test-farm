@@ -1,17 +1,15 @@
-import { Application, Loader, IApplicationOptions, Container, InteractionEvent, InteractionData, DisplayObject } from "pixi.js";
+import { Application, Loader, IApplicationOptions, Container, InteractionEvent } from "pixi.js";
 import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
-import { FarmPlotView } from "./views/FarmPlotView";
+import { ProducerConfig } from "./game/Entities";
 import { FarmStorage } from "./game/FarmStorage";
+import { FarmPlotView } from "./views/FarmPlotView";
 import { FarmStorageView } from "./views/FarmStorageView";
-import { SpawnButton } from "./ui/SpawnButton";
-import producers from "./data/producers.json";
-import products from "./data/products.json";
-import { ProducerSprite } from "./views/ProducerSprite";
-import { IProducer, isConsumingProducer, ProducerType, ProductType } from "./game/Entities";
-import { DragGhost } from "./ui/DragGhost";
 import { TileSprite } from "./views/TileSprite";
+import { SpawnButton } from "./ui/SpawnButton";
+import { DragGhost } from "./ui/DragGhost";
+import producers from "./data/producers.json";
 
 export class Game {
   app: Application
@@ -36,16 +34,16 @@ export class Game {
     this.farmPlot = new FarmPlot({ shape: "square", size: 8 })
     this.placePlotView(this.farmPlot.view)
 
+    // pass products
     this.farmStorage = new FarmStorage()
     this.placeStorageView(this.farmStorage.view)
 
-    this.addSpawnButtons()
+    this.addSpawnButtons(Object.values(producers) as Array<ProducerConfig>)
 
     this.app.ticker.add((_) => {
       this.farmPlot.update(this.app.ticker.deltaMS)
     })
 
-    events.on("spawn-entity", this.farmPlot.spawnEntity, this.farmPlot)
     events.on("harvested", this.farmStorage.storeProduct, this.farmStorage)
     events.on("harvest-attempt", ({ event, entity, tileSprite }) => {
       const ghost = new DragGhost(entity.output)
@@ -76,17 +74,17 @@ export class Game {
     console.log("game objects set up")
   }
 
-  addSpawnButtons() {
+  addSpawnButtons(configs: ProducerConfig[]) {
     const buttonsContainer = new Container()
 
-    producers.forEach(p => {
-      const producerType = p.type as ProducerType
-      const btn = new SpawnButton(producerType)
+    configs.forEach(p => {
+      const btn = new SpawnButton(p.type)
       btn.y = buttonsContainer.height
       buttonsContainer.addChild(btn)
 
+      // needs decoupling from farmPlot
       btn.on("pointerdown", (e: InteractionEvent) => {
-        const ghost = new DragGhost(p.type as ProductType)
+        const ghost = new DragGhost(p.type)
         this.app.stage.addChild(ghost)
         ghost.setDragOffset(e.data, btn)
         ghost.onDragStart(e)
@@ -97,15 +95,13 @@ export class Game {
         }
         ghost
           .on('pointermove', (e) => {
-            this.farmPlot.view.findOverlap(e, t => t.data.isEmpty)
+            this.farmPlot.view.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
             ghost.onDragMove(e)
           })
           .on('pointerup', () => {
-            const targetTile = this.farmPlot.view.findOverlap(e, t => t.data.isEmpty)
+            const targetTile = this.farmPlot.view.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
             if (targetTile) {
-              const entity = this.farmPlot.getNewEntity(p)
-              const sprite = new ProducerSprite(entity, producerType)
-              this.farmPlot.placeOnTile(entity, sprite, targetTile)
+              this.farmPlot.spawnOnTile(targetTile, p)
             }
             onDragEnd()
           })

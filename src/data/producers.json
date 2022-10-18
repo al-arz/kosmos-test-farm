@@ -1,12 +1,12 @@
-[
-  {
+{
+  "wheat": {
     "type": "wheat",
     "yields": {
       "product": "wheat",
       "period": 10000
     }
   },
-  {
+  "chicken": {
     "type": "chicken",
     "consumes": {
         "product": "wheat",
@@ -18,7 +18,7 @@
       "period": 10000
     }
   },
-  {
+  "cow": {
     "type": "cow",
     "consumes": {
         "product": "wheat",
@@ -30,4 +30,4 @@
       "period": 20000
     }
   }
-]
+}

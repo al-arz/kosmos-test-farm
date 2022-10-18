@@ -1,7 +1,6 @@
 import { FarmPlotView } from "../views/FarmPlotView"
-import { ProducerSprite } from "../views/ProducerSprite"
 import { TileSprite } from "../views/TileSprite"
-import { BasicProducer, ConsumingProducer, IConsumer, IProducer } from "./Entities"
+import { BasicProducer, ConsumingProducer, IConsumer, IProducer, ProducerConfig, SomeProducer } from "./Entities"
 import { Tile } from "./Tile"
 
 export type FarmPlotConfig = {
@@ -55,41 +54,17 @@ export class FarmPlot {
     })
   }
 
-  spawnEntity(p) {
-    const tile = this.view.children.find(tileSprite => tileSprite.data.isEmpty)
-    if (!tile) return
-
-    let entity, sprite
-    if (p.consumes) {
-      entity = new ConsumingProducer(p)
+  spawnOnTile(tile: TileSprite, conf: ProducerConfig) {
+    let entity: SomeProducer
+    if (conf.consumes === undefined) {
+      entity = new BasicProducer(conf)
     } else {
-      entity = new BasicProducer(p)
+      entity = new ConsumingProducer(conf)
     }
 
-    sprite = new ProducerSprite(entity, p.name)
-    this.entities.push(entity)
     tile.data.addEntity(entity)
-
-    this.view.entitySprites.push(sprite)
-    tile.addChild(sprite)
-  }
-
-  placeOnTile(entity: IProducer, sprite: ProducerSprite, tileSprite: TileSprite) {
     this.entities.push(entity)
-    tileSprite.data.addEntity(entity)
-    tileSprite.buttonMode = true
-    this.view.entitySprites.push(sprite)
-    sprite.position.set(0, 0)
-    sprite.scale.set(0.5)
-    sprite.alpha = 1
-    tileSprite.addChild(sprite)
-  }
 
-  getNewEntity(p) {
-    if (p.consumes) {
-      return new ConsumingProducer(p)
-    } else {
-      return new BasicProducer(p)
-    }
+    this.view.displayOnTile(entity, conf, tile)
   }
 }

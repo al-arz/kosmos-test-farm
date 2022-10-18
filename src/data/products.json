@@ -1,13 +1,13 @@
-[
-  {
-    "name": "wheat"
+{
+  "wheat": {
+    "type": "wheat"
   },
-  {
-    "name": "egg",
+  "egg": {
+    "type": "egg",
     "sellPrice": 100
   },
-  {
+  "milk": {
     "name": "milk",
     "sellPrice": 150
   }
-]
+}

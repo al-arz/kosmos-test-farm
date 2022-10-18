@@ -1,4 +1,6 @@
 import { Container, InteractionEvent } from "pixi.js";
+import { ProducerConfig } from "../Game";
+import { SomeProducer } from "../game/Entities";
 import { FarmPlot } from "../game/FarmPlot";
 import { ProducerSprite } from "./ProducerSprite";
 import { TileSprite } from "./TileSprite";
@@ -20,15 +22,20 @@ export class FarmPlotView extends Container<TileSprite> {
     })
   }
 
-  findOverlap(e: InteractionEvent, filter?) {
+  displayOnTile(entity: SomeProducer, config: ProducerConfig, tileSprite: TileSprite) {
+    const sprite = new ProducerSprite(entity, config.type)
+    this.entitySprites.push(sprite)
+    tileSprite.addChild(sprite)
+    tileSprite.buttonMode = true
+  }
 
+  findOverlap(e: InteractionEvent, filter?) {
     let subset = this.tileSprites
     if (filter) {
       console.log('filtered')
       subset = subset.filter(filter)
       if (subset.length === 0) return null
     }
-
 
     let nearest = subset[0]
     const pos0 = e.data.getLocalPosition(nearest)

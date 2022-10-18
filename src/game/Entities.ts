@@ -1,27 +1,28 @@
 import { ProgressTimer } from "./ProgressTimer"
 
-export type ProducerType = "wheat" | "chicken" | "cow"
-export type ProductType = "wheat" | "egg" | "milk"
+import producers from "../data/producers.json";
+import products from "../data/products.json";
 
-export type SomeProducer = BasicProducer | ConsumingProducer
+export type ProductType = keyof typeof products
+export type ProducerType = keyof typeof producers
+export type ProducersJSONValues = typeof producers[ProducerType]
 
-export function isConsumingProducer(entity: SomeProducer): entity is ConsumingProducer {
-  return (entity as ConsumingProducer).input !== undefined;
-}
-
-export type BasicProducerConfig = {
-  name: ProducerType
+export type ProducerConfig = {
+  type: ProducerType
+  consumes?: {
+    product: ProductType
+    period: number
+  },
   yields: {
     product: ProductType
     period: number
   }
 }
 
-export type ConsumingProducerConfig = BasicProducerConfig & {
-  consumes: {
-    product: ProductType
-    period: number
-  }
+export type SomeProducer = BasicProducer | ConsumingProducer
+
+export function isConsumingProducer(entity: SomeProducer): entity is ConsumingProducer {
+  return (entity as ConsumingProducer).input !== undefined;
 }
 
 export interface IProducer {
@@ -43,7 +44,7 @@ export class BasicProducer implements IProducer {
   output: ProductType
   harvestReady: boolean = false
 
-  constructor(config: BasicProducerConfig) {
+  constructor(config: ProducerConfig) {
     this.productionTimer = new ProgressTimer(config.yields.period)
     this.output = config.yields.product
   }
@@ -76,7 +77,7 @@ export class ConsumingProducer implements IConsumer, IProducer {
   supplied: boolean = false
   harvestReady: boolean = false
 
-  constructor(config: ConsumingProducerConfig) {
+  constructor(config: ProducerConfig) {
     this.productionTimer = new ProgressTimer(config.yields.period)
     this.consumptionTimer = new ProgressTimer(config.consumes.period)
     this.consumptionTimer.forceComplete()

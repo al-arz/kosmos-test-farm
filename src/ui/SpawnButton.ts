@@ -1,8 +1,8 @@
 import { Sprite, Texture } from "pixi.js"
+import { ProducerType } from "../game/Entities"
 
 export class SpawnButton extends Sprite {
-  // Constrain with union from spriteAssets?
-  constructor(assetName: string) {
+  constructor(assetName: ProducerType) {
     super(Texture.from(assetName))
 
     this.anchor.set(0.5, 0.5)

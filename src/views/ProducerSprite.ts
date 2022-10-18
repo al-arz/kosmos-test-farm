@@ -4,7 +4,7 @@ import { isConsumingProducer, ProducerType, SomeProducer } from "../game/Entitie
 
 export class ProducerSprite extends Sprite {
   data: SomeProducer
-  productionBar?: ProgressBar
+  productionBar: ProgressBar
   consumptionBar?: ProgressBar
 
   constructor(data: SomeProducer, type: ProducerType) {
