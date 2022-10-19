@@ -1,4 +1,4 @@
-import { settings, SCALE_MODES } from "pixi.js";
+import { settings, SCALE_MODES, Application } from "pixi.js";
 import { Game } from "./Game";
 
 // to get pixi.js devtools to work
@@ -6,15 +6,17 @@ import * as PIXI from "pixi.js";
 window.PIXI = PIXI
 
 settings.SCALE_MODE = SCALE_MODES.NEAREST // pixel art sprites should stay crisp
+
 const size = [1280, 900];
-const game = new Game({
+
+const game = new Game(new Application({
   view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
   resolution: window.devicePixelRatio || 1,
   autoDensity: true,
   backgroundColor: 0x547e64,
   width: size[0],
   height: size[1]
-});
+}));
 
 const ratio = size[0] / size[1];
 
@@ -30,5 +32,7 @@ function resize() {
   game.app.renderer.view.style.width = w + 'px';
   game.app.renderer.view.style.height = h + 'px';
 }
+
 window.onresize = resize
+
 resize()

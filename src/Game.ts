@@ -1,4 +1,4 @@
-import { Application, Loader, IApplicationOptions, Container, InteractionEvent, DisplayObject, Text } from "pixi.js";
+import { Application, Loader, Container, InteractionEvent, DisplayObject, Text } from "pixi.js";
 import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
@@ -22,8 +22,8 @@ export class Game {
   funds = 0
   fundsLabel!: Text
 
-  constructor(options: IApplicationOptions) {
-    this.app = new Application(options)
+  constructor(app: Application) {
+    this.app = app
 
     Loader.shared.add(Object.values(spriteAssets))
     Loader.shared.onComplete.once(this.onAssetsLoad, this)
@@ -175,7 +175,7 @@ export class Game {
     )
   }
 
-  // Setting container childrens' anchor offsets container bounds
+  // Container children with anchor != 0 offset container bounds
   // Here we're adjusting for that. Yes, it's ugly
   offsetBounds(obj: DisplayObject) {
     const bounds = obj.getBounds()

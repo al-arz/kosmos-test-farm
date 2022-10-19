@@ -1,4 +1,4 @@
-import { DisplayObject, InteractionData, InteractionEvent, IPoint, Point, Sprite, Texture } from "pixi.js";
+import { DisplayObject, InteractionData, InteractionEvent, Point, Sprite, Texture } from "pixi.js";
 import { ProducerType, ProductType } from "../game/Entities";
 
 export class DragGhost extends Sprite {

@@ -1,4 +1,4 @@
-import { Container, Graphics, InteractionEvent } from "pixi.js";
+import { Container, InteractionEvent } from "pixi.js";
 import { ProducerConfig, SomeProducer } from "../game/Entities";
 import { FarmPlot } from "../game/FarmPlot";
 import { ProducerSprite } from "./ProducerSprite";
@@ -23,12 +23,6 @@ export class FarmPlotView extends Container<TileSprite> {
       )
       this.addChild(tileSprite)
     })
-
-    const g = new Graphics()
-    g.drawRect(0, 0, this.width, this.height)
-    g.beginFill(0xee0000)
-    g.endFill()
-    this.addChild(g)
   }
 
   update() {
