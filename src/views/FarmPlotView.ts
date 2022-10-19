@@ -31,6 +31,12 @@ export class FarmPlotView extends Container<TileSprite> {
     this.addChild(g)
   }
 
+  update() {
+    this.entitySprites.forEach(s => {
+      s.update()
+    })
+  }
+
   displayOnTile(entity: SomeProducer, config: ProducerConfig, tileSprite: TileSprite) {
     const sprite = new ProducerSprite(entity, config.type)
     this.entitySprites.push(sprite)
@@ -38,19 +44,18 @@ export class FarmPlotView extends Container<TileSprite> {
     tileSprite.buttonMode = true
   }
 
-  findOverlap(e: InteractionEvent, filter?) {
-    let subset = this.tileSprites
+  findOverlap(e: InteractionEvent, filter: (ts: TileSprite) => boolean) {
+    let tileSubset = this.tileSprites
     if (filter) {
-      console.log('filtered')
-      subset = subset.filter(filter)
-      if (subset.length === 0) return null
+      tileSubset = tileSubset.filter(filter)
+      if (tileSubset.length === 0) return null
     }
 
-    let nearest = subset[0]
+    let nearest = tileSubset[0]
     const pos0 = e.data.getLocalPosition(nearest)
     let minDistSq = pos0.x * pos0.x + pos0.y * pos0.y
 
-    subset.forEach(t => {
+    tileSubset.forEach(t => {
       const pos = e.data.getLocalPosition(t)
       const distSq = pos.x * pos.x + pos.y * pos.y
       if (minDistSq > distSq) {

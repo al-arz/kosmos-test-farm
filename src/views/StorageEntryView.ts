@@ -6,7 +6,7 @@ export class StorageEntryView extends Container {
   label: Text
   productType: ProductType
 
-  constructor(type: ProductType, size: number = 1) {
+  constructor(type: ProductType, size = 1) {
     super()
     this.icon = Sprite.from(type)
     this.label = new Text("0", { fill: 0x2e222f })

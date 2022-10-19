@@ -1,9 +1,8 @@
-import { FarmStorageView } from "../views/FarmStorageView";
+import { events } from "../events";
 import { ProductType } from "./Entities";
 
 export class FarmStorage {
   products: { [key in ProductType]: number }
-  view: FarmStorageView
 
   constructor() {
     this.products = {
@@ -11,13 +10,19 @@ export class FarmStorage {
       egg: 0,
       milk: 0,
     }
-
-    this.view = new FarmStorageView(this)
   }
 
   storeProduct(p: ProductType) {
     this.products[p]++
-    console.log("farm storage", this.products)
-    this.view.update()
+    events.emit("storage-update", this)
+  }
+
+  retrieveProduct(p: ProductType) {
+    this.products[p]--
+    events.emit("storage-update", this)
+  }
+
+  has(p: ProductType) {
+    return this.products[p]
   }
 }

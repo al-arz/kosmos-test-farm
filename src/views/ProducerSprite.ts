@@ -11,10 +11,8 @@ export class ProducerSprite extends Sprite {
     super(Texture.from(type))
     this.data = data
 
-    // this.scale.set(0.5)
     this.anchor.set(0.5, 0.5)
 
-    //Builder pattern?
     this.productionBar = new ProgressBar(0xFFFFFF)
     this.productionBar.position.y = 14
     this.productionBar.scale.set(2)

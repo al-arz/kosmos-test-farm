@@ -5,7 +5,6 @@ import products from "../data/products.json";
 
 export type ProductType = keyof typeof products
 export type ProducerType = keyof typeof producers
-export type ProducersJSONValues = typeof producers[ProducerType]
 
 export type ProducerConfig = {
   type: ProducerType
@@ -42,7 +41,7 @@ export interface IConsumer {
 export class BasicProducer implements IProducer {
   productionTimer: ProgressTimer
   output: ProductType
-  harvestReady: boolean = false
+  harvestReady = false
 
   constructor(config: ProducerConfig) {
     this.productionTimer = new ProgressTimer(config.yields.period)
@@ -74,8 +73,8 @@ export class ConsumingProducer implements IConsumer, IProducer {
   productionTimer: ProgressTimer
   output: ProductType
   input: ProductType
-  supplied: boolean = false
-  harvestReady: boolean = false
+  supplied = false
+  harvestReady = false
 
   constructor(config: ProducerConfig) {
     this.productionTimer = new ProgressTimer(config.yields.period)

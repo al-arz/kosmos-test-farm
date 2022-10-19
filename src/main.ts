@@ -29,8 +29,6 @@ function resize() {
   }
   game.app.renderer.view.style.width = w + 'px';
   game.app.renderer.view.style.height = h + 'px';
-
-  console.log(game.app.screen.width, game.app.screen.height)
 }
 window.onresize = resize
 resize()

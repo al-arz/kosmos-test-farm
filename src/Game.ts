@@ -1,8 +1,8 @@
-import { Application, Loader, IApplicationOptions, Container, InteractionEvent, DisplayObject } from "pixi.js";
+import { Application, Loader, IApplicationOptions, Container, InteractionEvent, DisplayObject, Text } from "pixi.js";
 import { events } from "./events";
 import { spriteAssets } from "./assets";
 import { FarmPlot } from "./game/FarmPlot";
-import { ProducerConfig } from "./game/Entities";
+import { ProducerConfig, ProductType } from "./game/Entities";
 import { FarmStorage } from "./game/FarmStorage";
 import { FarmPlotView } from "./views/FarmPlotView";
 import { FarmStorageView } from "./views/FarmStorageView";
@@ -10,12 +10,17 @@ import { TileSprite } from "./views/TileSprite";
 import { SpawnButton } from "./ui/SpawnButton";
 import { DragGhost } from "./ui/DragGhost";
 import producers from "./data/producers.json";
+import products from "./data/products.json";
 
 export class Game {
   app: Application
 
   farmPlot!: FarmPlot
+  farmPlotView!: FarmPlotView
   farmStorage!: FarmStorage
+  farmStorageView!: FarmStorageView
+  funds = 0
+  fundsLabel!: Text
 
   constructor(options: IApplicationOptions) {
     this.app = new Application(options)
@@ -32,38 +37,54 @@ export class Game {
 
   setup() {
     this.farmPlot = new FarmPlot({ shape: "square", size: 8 })
-    this.placePlotView(this.farmPlot.view)
+    this.farmPlotView = new FarmPlotView(this.farmPlot)
+    this.placePlotView(this.farmPlotView)
 
-    // pass products
+    // pass products?
     this.farmStorage = new FarmStorage()
-    this.placeStorageView(this.farmStorage.view)
+    this.farmStorageView = new FarmStorageView(this.farmStorage)
+    this.placeStorageView(this.farmStorageView)
 
     this.addSpawnButtons(Object.values(producers) as Array<ProducerConfig>)
 
+    this.fundsLabel = new Text('', { fill: 0xFFFFFF })
+    this.updateFundsLabel(this.funds)
+    this.app.stage.addChild(this.fundsLabel)
+
     this.app.ticker.add((_) => {
       this.farmPlot.update(this.app.ticker.deltaMS)
+      this.farmPlotView.update()
     })
 
     events.on("harvested", this.farmStorage.storeProduct, this.farmStorage)
+    events.on("storage-update", (s: FarmStorage) => {
+      this.farmStorageView.update(s)
+    })
+    events.on("sell-attempt", (p: ProductType) => {
+      if (products[p].sellPrice !== undefined && this.farmStorage.has(p) > 0) {
+        this.farmStorage.retrieveProduct(p)
+        this.increaseFunds(products[p].sellPrice)
+      }
+    })
     events.on("harvest-attempt", ({ event, entity, tileSprite }) => {
       const ghost = new DragGhost(entity.output)
       ghost.setDragOffset(event.data, tileSprite)
       this.app.stage.addChild(ghost)
       ghost.onDragStart(event)
       ghost.on("pointermove", (e) => {
-        this.farmPlot.view.findOverlap(e, (t: TileSprite) => {
+        this.farmPlotView.findOverlap(e, (t: TileSprite) => {
           return !t.data.isEmpty && (t.data.contents[0].input === entity.output)
         })
         ghost.onDragMove(e)
       })
       ghost.on("pointerup", (e) => {
-        const target = this.farmPlot.view.findOverlap(e, (t: TileSprite) => {
+        const target = this.farmPlotView.findOverlap(e, (t: TileSprite) => {
           return !t.data.isEmpty && (t.data.contents[0].input === entity.output)
         })
         ghost.onDragEnd()
         if (target) {
           target.data.contents[0].supply(entity.output)
-          this.farmPlot.view.cancelSelection()
+          this.farmPlotView.cancelSelection()
           entity.harvest()
         } else {
           events.emit("harvested", entity.harvest())
@@ -93,17 +114,18 @@ export class Game {
 
         const onDragEnd = () => {
           ghost.onDragEnd()
-          this.farmPlot.view.cancelSelection()
+          this.farmPlotView.cancelSelection()
         }
         ghost
           .on('pointermove', (e) => {
-            this.farmPlot.view.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
+            this.farmPlotView.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
             ghost.onDragMove(e)
           })
           .on('pointerup', () => {
-            const targetTile = this.farmPlot.view.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
+            const targetTile = this.farmPlotView.findOverlap(e, (t: TileSprite) => t.data.isEmpty)
             if (targetTile) {
-              this.farmPlot.spawnOnTile(targetTile, p)
+              const entity = this.farmPlot.spawnOnTile(targetTile, p)
+              this.farmPlotView.displayOnTile(entity, p, targetTile)
             }
             onDragEnd()
           })
@@ -138,6 +160,19 @@ export class Game {
 
     this.offsetBounds(plotView)
     this.app.stage.addChild(plotView)
+  }
+
+  increaseFunds(amount: number) {
+    this.funds += amount
+    this.updateFundsLabel(this.funds)
+  }
+
+  updateFundsLabel(amount: number) {
+    this.fundsLabel.text = '$' + amount
+    this.fundsLabel.position.set(
+      (this.app.screen.width - this.fundsLabel.width) / 2,
+      32
+    )
   }
 
   // Setting container childrens' anchor offsets container bounds

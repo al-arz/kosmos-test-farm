@@ -1,7 +1,7 @@
 export class ProgressTimer {
   readonly period: number
   private _timePassed: number
-  constructor(period: number, initialTime: number = 0) {
+  constructor(period: number, initialTime = 0) {
     this.period = period
     this._timePassed = initialTime
   }

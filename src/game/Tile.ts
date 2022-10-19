@@ -1,4 +1,4 @@
-import { IConsumer, IProducer } from "./Entities"
+import { IProducer } from "./Entities"
 
 type TileCoords = {
   row: number
@@ -8,7 +8,7 @@ type TileCoords = {
 export class Tile {
   readonly id: number
   readonly position: TileCoords
-  readonly contents: Array<IProducer | IConsumer> = []
+  readonly contents: Array<IProducer> = []
 
   private static id = 0
 
@@ -21,7 +21,7 @@ export class Tile {
     return this.contents.length === 0
   }
 
-  addEntity(entity: IProducer | IConsumer) {
+  addEntity(entity: IProducer) {
     this.contents.push(entity)
   }
 }

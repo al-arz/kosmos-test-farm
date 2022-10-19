@@ -10,5 +10,5 @@ Using assets from [Raven Fantasy Farmlands](https://clockworkraven.itch.io/raven
 
 ### Building
 
-dev: `npm run start`
-prod: `npm run build`
+* dev: `npm run start`
+* prod: `npm run build`
